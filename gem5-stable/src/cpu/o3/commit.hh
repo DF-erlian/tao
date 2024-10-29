@@ -221,6 +221,9 @@ class Commit
      */
     void generateTCEvent(ThreadID tid);
 
+    //File to save dump
+    FILE *tptr;
+    int inst_count = 0;
   private:
     /** Updates the overall status of commit with the nextStatus, and
      * tell the CPU if commit is active/inactive.

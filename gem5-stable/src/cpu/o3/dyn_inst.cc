@@ -455,5 +455,35 @@ DynInst::initiateMemAMO(Addr addr, unsigned size, Request::Flags flags,
             std::move(amo_op), std::vector<bool>(size, true));
 }
 
+void
+DynInst::dumpInsts(FILE *tptr){
+    fprintf(tptr, "%lu\t%lu\t%lu\t", this->FetchTick, this->OutRobTick - this->FetchTick, this->CommitTick);
+
+    //op
+    fprintf(tptr, "%d\t", this->opClass());
+
+    //flags
+    for(unsigned int i =  gem5::StaticInstFlags::Flags::IsNop; i < gem5::StaticInstFlags::Num_Flags; i++){
+        fprintf(tptr, "%d\t",this->staticInst->getflags(i));
+    }
+
+    //regs
+    fprintf(tptr, "%lu\t", this->numSrcRegs());
+    for(unsigned int i = 0; i < this->numSrcRegs(); i++){
+        fprintf(tptr, "%d\t%d\t", this->srcRegIdx(i).classValue(), this->srcRegIdx(i).index());
+    }
+
+    fprintf(tptr, "%lu ", this->numDestRegs());
+    for(unsigned int i = 0; i < this->numDestRegs(); i++){
+        fprintf(tptr, "%d\t%d\t", this->destRegIdx(i).classValue(), this->destRegIdx(i).index());
+    }
+
+    //mem address
+    fprintf(tptr, "%d\t%lu\t", this->isMemRef(), this->effAddr);
+
+    //pc
+    fprintf(tptr, "%d\t%lu\n", this->isCall() | this->isControl() | this->isReturn(), this->pc->instAddr());
+}
+
 } // namespace o3
 } // namespace gem5

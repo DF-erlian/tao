@@ -130,6 +130,11 @@ Commit::Commit(CPU *_cpu, const BaseO3CPUParams &params)
         htmStops[tid] = 0;
     }
     interrupt = NoFault;
+
+    //open file trace.txt in write mode
+    tptr = fopen("trace_o3.txt", "w");
+    assert(tptr == NULL);
+    inst_count = 0;
 }
 
 std::string Commit::name() const { return cpu->name() + ".commit"; }
@@ -1271,6 +1276,13 @@ Commit::commitHead(const DynInstPtr &head_inst, unsigned inst_num)
         head_inst->commitTick = curTick() - head_inst->fetchTick;
     }
 #endif
+    head_inst->CommitTick = curTick();
+    if(inst_count < 10'000'000){
+        inst_count += 1;
+    }
+    else{
+        head_inst->dumpInsts(tptr);
+    }
 
     // If this was a store, record it for this cycle.
     if (head_inst->isStore() || head_inst->isAtomic())

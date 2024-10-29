@@ -764,7 +764,7 @@ class DynInst : public ExecContext, public RefCounted
     bool isExecuted() const { return status[Executed]; }
 
     /** Sets this instruction as ready to commit. */
-    void setCanCommit() { status.set(CanCommit); }
+    void setCanCommit() { status.set(CanCommit); OutRobTick = curTick();}
 
     /** Clears this instruction as being ready to commit. */
     void clearCanCommit() { status.reset(CanCommit); }
@@ -996,6 +996,12 @@ class DynInst : public ExecContext, public RefCounted
     int32_t commitTick = -1;
     int32_t storeTick = -1;
 #endif
+    Tick FetchTick = -1; 
+    Tick OutRobTick = -1;
+    Tick CommitTick = -1;
+
+    //dump an instruction
+    void dumpInsts(FILE* tptr);
 
     /* Values used by LoadToUse stat */
     Tick firstIssue = -1;

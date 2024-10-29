@@ -1259,6 +1259,7 @@ Fetch::fetch(bool &status_change)
                 instruction->fetchTick = curTick();
             }
 #endif
+            instruction->FetchTick = curTick();
 
             set(next_pc, this_pc);
 
