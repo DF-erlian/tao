@@ -3,6 +3,7 @@ from torch import nn
 from torch.nn import functional
 
 
+
 class Config():
     def __init__(self, dm: int, dk: int, head_num: int, layer_num: int, intermediate_size: int, vocab_size: int, max_len: int) -> None:
         self.dm = dm  # 这个是词向量的维度
@@ -35,7 +36,8 @@ class Embedding2(nn.Module):
         self.drop_out = nn.Dropout(p=0.1)
         
     def forward(self, x: torch.Tensor):
-        y = torch.LongTensor([[i for i in range(0, x.shape[1])] for _ in range(0, x.shape[0])], device = x.device)
+        # y = torch.LongTensor([[i for i in range(0, x.shape[1])] for _ in range(0, x.shape[0])], device = x.device)
+        y = torch.tensor([[i for i in range(0, x.shape[1])] for _ in range(0, x.shape[0])], device = x.device, dtype = torch.long)
         y = self.pos(y)
         return self.drop_out(x + y)
 
@@ -100,7 +102,7 @@ class Out_Head(nn.Module):
     def __init__(self, Config: Config) -> None:
         super().__init__()
         self.pooler = nn.Linear(Config.dm, Config.dm, bias=False)
-        self.o_head = nn.Linear(Config.dm, 1, bias=False)
+        self.o_head = nn.Linear(Config.dm, 2, bias=False)
         
     def forward(self, x: torch.Tensor):
         x = self.pooler(x)

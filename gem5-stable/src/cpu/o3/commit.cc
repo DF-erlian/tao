@@ -1277,7 +1277,7 @@ Commit::commitHead(const DynInstPtr &head_inst, unsigned inst_num)
     }
 #endif
     head_inst->CommitTick = curTick();
-    if(inst_count < 10'000'000){
+    if(inst_count < 100'000'000){
         inst_count += 1;
     }
     else{

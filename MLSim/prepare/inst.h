@@ -1,6 +1,8 @@
 #include<vector>
 #include<iostream>
 #include<sstream>
+#include <cstdint>
+#include <cassert>
 using namespace std;
 
 typedef uint64_t Tick;
@@ -16,8 +18,7 @@ public:
     vector<int> flags;
 
     int numSrcRegs, numDestRegs;
-    vector<int> intRegVector;
-    vector<int> floatRegVector;
+    vector<pair<int, int>> regVector;
 
     int isMem = 0;
     uint64_t memAddr = 0;
@@ -25,7 +26,7 @@ public:
     int isBranch = 0;
     uint64_t pc;
 public:
-    Instruction():flags(NumFlags, 0), intRegVector(32, 0), floatRegVector(32, 0){}
+    Instruction():flags(NumFlags, 0){}
     ~Instruction(){}
     void read(string& s){
         stringstream ss(s);
@@ -42,22 +43,14 @@ public:
         for(int i = 0; i < numSrcRegs; i++){
             int regClass, regIdx;
             ss >> regClass >> regIdx;
-            if(regClass == 0){
-                intRegVector[regIdx] = 1;
-            }else if(regClass == 1){
-                floatRegVector[regIdx] = 1;
-            }
+            regVector.emplace_back(regClass, regIdx);
         }
 
         ss >> numDestRegs;
         for(int i = 0; i < numDestRegs; i++){
             int regClass, regIdx;
             ss >> regClass >> regIdx;
-            if(regClass == 0){
-                intRegVector[regIdx] = 1;
-            }else if(regClass == 1){
-                floatRegVector[regIdx] = 1;
-            }
+            regVector.emplace_back(regClass, regIdx);
         }
 
         

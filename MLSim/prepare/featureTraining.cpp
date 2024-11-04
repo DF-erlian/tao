@@ -3,11 +3,12 @@
 #include<fstream>
 #include<queue>
 #include<unordered_map>
+#include<map>
 
 using namespace std;
 
-const char* workload = "/worksapce/TAO/MLSim/workload/spec2006/bzip2/trace_o3_train.txt";
-const char* trainData = "/worksapce/TAO/MLSim/workload/spec2006/bzip2/trainData.txt";
+const char* workload = "../workload/spec2006/bzip2/trace_o3_train.txt";
+const char* trainData = "../workload/spec2006/bzip2/trainData/data.txt";
 
 const int Num_OpClass = 74;
 const int TicksPreClock = 250;
@@ -17,14 +18,16 @@ int main(){
 
     Tick curTick = -1;
     
-    int numAddrHistory = 64; //超参
+    int numAddrHistory = 256; //超参
     vector<uint64_t> addrHistory;
 
     unordered_map<int, vector<int>> bpHash;
-    int NumHash = 64, tableSize = 64; //超参
+    int NumHash = 256, tableSize = 64; //超参
     for(int i = 0; i < NumHash; i++){ //初始化
         bpHash[i] = vector<int>(tableSize, 0);
     }
+
+    map<int, int> regMap;
 
     string line;
     Instruction Inst;
@@ -32,7 +35,7 @@ int main(){
 
     bool first = true;
 
-    long long instCnt = 0;
+    long long instCnt = -1;
     int fileNum = 0;
     string trainDataFile = string(trainData) + to_string(fileNum);
     ofstream traindata(trainDataFile);
@@ -40,12 +43,52 @@ int main(){
         cout << "something wrong in open new traindata file" << endl;
     }
 
+    // //process regmap
+    // while(getline(trace, line)){
+    //     instCnt += 1;
+
+    //     if(instCnt >= 10'000'000 ){
+    //         break;
+    //     }
+    //     Inst = Instruction();
+    //     Inst.read(line);
+
+    //     for(auto&p : Inst.regVector){
+    //         int idx = p.first * 1000 + p.second;
+    //         if(regMap.count(idx)){
+    //             continue;
+    //         }
+    //         else{
+    //             regMap[idx] = regMap.size();
+    //         }
+    //     }
+    // }
+    // trace.close();
+
+    // cout << regMap.size() << endl;
+
+    // ofstream maptrace("./regMapTrace.txt");
+    // for(auto [tag, idx] : regMap){
+    //     maptrace << tag << "\t\t" << idx << endl;
+    // }
+    // maptrace.close();
+
+
+    ifstream maptrace("./regMapTrace.txt");
+    while(!maptrace.eof()){
+        int tag, idx;
+        maptrace >> tag >> idx;
+        regMap[tag] = idx;
+    }
+
+
     while(getline(trace, line)){
         instCnt += 1;
 
-        if(instCnt >= 10'000'000 ){
+        if(instCnt >= 1'000'000 ){
             traindata.close();
             
+            // break;
             instCnt = 0;
             fileNum += 1;
             trainDataFile = string(trainData) + to_string(fileNum);
@@ -54,6 +97,10 @@ int main(){
             if(!traindata.is_open()){
                 cout << "something wrong in open new traindata file" << endl;
             }
+        }
+
+        if(fileNum >=10 ){
+            break;
         }
 
         Inst = Instruction();
@@ -84,12 +131,15 @@ int main(){
         }
 
         ///dump registers
-        for(int i = 0; i < 32; i++){
-            traindata << " " << Inst.intRegVector[i];
+        vector<int> regs(regMap.size(), 0);
+        for(auto&p : Inst.regVector){
+            int tag = p.first * 1000 + p.second;
+            if(regMap.count(tag)) regs[regMap[tag]]  = 1;
         }
-        // for(int i = 0; i < 32; i++){
-        //     traindata << " " << Inst.floatRegVector[i];
-        // }
+
+        for(int t : regs){
+            traindata << " " << t;
+        }
 
         ///dump addr
         if(!Inst.isMem){
