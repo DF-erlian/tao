@@ -37,21 +37,22 @@ class TAO(nn.Module):
     def __init__(self, EmbedConfig, TransConfig, dropout=0.1) -> None:
         super().__init__() 
         self.InstEmbed = InstEmbed(EmbedConfig)
-        self.PositionalEncoder = PositionalEncoding(TransConfig)
+        # self.PositionalEncoder = PositionalEncoding(TransConfig)
         
-        self.EncoderLayers = nn.TransformerEncoderLayer(d_model=TransConfig.instfeatures,
+        EncoderLayers = nn.TransformerEncoderLayer(d_model=TransConfig.instfeatures,
                                                         nhead=TransConfig.nheads,
                                                         dim_feedforward=TransConfig.nhiddens,
                                                         dropout=dropout,
-                                                        batch_first=True
+                                                        batch_first=True,
+                                                        activation='relu'
                                                         )
-        self.Encoder = nn.TransformerEncoder(self.EncoderLayers, TransConfig.nlayers)
+        self.Encoder = nn.TransformerEncoder(EncoderLayers, TransConfig.nlayers)
         
-        self.linear = nn.Linear(TransConfig.instfeatures * TransConfig.instlength, 2)
+        self.linear = nn.Linear(TransConfig.instfeatures * TransConfig.instlength, 1)
     
     def forward(self, x):   #torch.Size([1024, 96, 484])
         x = self.InstEmbed(x)   #torch.Size([1024, 96, 512])
-        x = self.PositionalEncoder(x)   #torch.Size([1024, 96, 512])
+        # x = self.PositionalEncoder(x)   #torch.Size([1024, 96, 512])
         x = self.Encoder(x)     #torch.Size([1024, 96, 512])
         x = x.reshape(x.shape[0], -1)   
         x = self.linear(x)      #torch.Size([1024, 2])

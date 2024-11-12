@@ -11,6 +11,7 @@ cscope.out
 m5out
 m5out*
 trace*
+run_spec.sh
 /src/doxygen/html
 /ext/dramsim2/DRAMSim2
 /ext/mcpat/regression/*/*.out

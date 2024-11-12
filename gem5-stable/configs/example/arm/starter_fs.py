@@ -143,6 +143,11 @@ def create(args):
         )
     ]
 
+    if args.maxinsts:
+        for cluster in system.cpu_cluster:
+            for i in range(args.num_cores):
+                cluster.cpus[i].max_insts_any_thread = args.maxinsts
+    
     # Create a cache hierarchy for the cluster. We are assuming that
     # clusters have core-private L1 caches and an L2 that's shared
     # within the cluster.
@@ -301,6 +306,15 @@ def main():
         default=23,
         help="The number of the PPI to use to connect each PMU to its core. "
         "Must be an integer and a valid PPI number (16 <= int_num <= 31).",
+    )
+    parser.add_argument(
+        "-I",
+        "--maxinsts",
+        action="store",
+        type=int,
+        default=None,
+        help="""Total number of instructions to
+                                            simulate (default: run forever)""",
     )
     parser.add_argument("--checkpoint", action="store_true")
     parser.add_argument("--restore", type=str, default=None)

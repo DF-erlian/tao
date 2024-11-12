@@ -24,7 +24,7 @@ class InstEmbed(nn.Module):
         self.MemEmbed = nn.Linear(Config.memfeatures, Config.memhide)
         self.BrEmbed = nn.Linear(Config.branchfeatures, Config.branchhide)
         self.instEmbed = nn.Linear(Config.ophide + Config.reghide + Config.memhide + Config.branchhide, Config.instfeatures)
-        self.bn = nn.BatchNorm1d(Config.memhide)
+        # self.bn = nn.BatchNorm1d(Config.memhide)
         
     def forward(self, x:torch.Tensor):
         op = x[:, :, :self.Config.opfeatures]
@@ -36,7 +36,7 @@ class InstEmbed(nn.Module):
         op = self.OpEmbed(op)
         reg = self.RegEmbed(reg)
         mem = self.MemEmbed(mem)
-        mem = self.bn(mem.view(-1, self.Config.memhide)).view(-1, op.shape[1], self.Config.memhide)
+        # mem = self.bn(mem.view(-1, self.Config.memhide)).view(-1, op.shape[1], self.Config.memhide)
         br = self.BrEmbed(br)
         
         x = torch.cat((op, reg, mem, br), dim=2)

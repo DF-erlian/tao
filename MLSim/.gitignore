@@ -1,2 +1,5 @@
 workload
 featureTraining
+log*
+dist
+plot*
