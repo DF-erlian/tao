@@ -12,6 +12,7 @@ m5out
 m5out*
 trace*
 run_spec.sh
+tests
 /src/doxygen/html
 /ext/dramsim2/DRAMSim2
 /ext/mcpat/regression/*/*.out

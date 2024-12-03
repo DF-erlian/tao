@@ -3,12 +3,13 @@ import torch.nn as nn
 from inst_embedding import InstEmbed, EmbedConfig
 
 class TransConfig():
-    def __init__(self, instlength:int, instfeatures:int, nheads:int, nhiddens:int, nlayers:int) -> None:
+    def __init__(self, instlength:int, instfeatures:int, nheads:int, nhiddens:int, nlayers:int, out:int) -> None:
         self.instlength = instlength
         self.instfeatures = instfeatures
         self.nheads = nheads
         self.nhiddens = nhiddens
         self.nlayers = nlayers
+        self.out = out
         
 
 class PositionalEncoding(nn.Module):
@@ -37,7 +38,7 @@ class TAO(nn.Module):
     def __init__(self, EmbedConfig, TransConfig, dropout=0.1) -> None:
         super().__init__() 
         self.InstEmbed = InstEmbed(EmbedConfig)
-        # self.PositionalEncoder = PositionalEncoding(TransConfig)
+        self.PositionalEncoder = PositionalEncoding(TransConfig)
         
         EncoderLayers = nn.TransformerEncoderLayer(d_model=TransConfig.instfeatures,
                                                         nhead=TransConfig.nheads,
@@ -48,22 +49,22 @@ class TAO(nn.Module):
                                                         )
         self.Encoder = nn.TransformerEncoder(EncoderLayers, TransConfig.nlayers)
         
-        self.linear = nn.Linear(TransConfig.instfeatures * TransConfig.instlength, 1)
+        self.linear = nn.Linear(TransConfig.instfeatures * TransConfig.instlength, TransConfig.out)
     
     def forward(self, x):   #torch.Size([1024, 96, 484])
         x = self.InstEmbed(x)   #torch.Size([1024, 96, 512])
-        # x = self.PositionalEncoder(x)   #torch.Size([1024, 96, 512])
+        x = self.PositionalEncoder(x)   #torch.Size([1024, 96, 512])
         x = self.Encoder(x)     #torch.Size([1024, 96, 512])
         x = x.reshape(x.shape[0], -1)   
         x = self.linear(x)      #torch.Size([1024, 2])
         return x
     
-# embedconfig = EmbedConfig(74+39, 51, 256, 64, 128, 128, 512, 256, 512)
-# transconfig = TransConfig(96, 512, 4, 2048, 4)
+# embedconfig = EmbedConfig(74+39, 52, 128, 64, 64, 64, 256, 256, 512)
+# transconfig = TransConfig(97, 512, 8, 2048, 3)
 # model = TAO(embedconfig, transconfig)
 
 # # print(model)
-# input = torch.randn(512, 96, 484)
+# input = torch.randn(512, 97, 357)
 # model.cuda() 
 # input = input.to("cuda")
 
